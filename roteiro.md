@@ -256,6 +256,49 @@ Não existe consenso — é um debate técnico, ético e regulatório ainda em a
 
 ---
 
+## 8. Tópicos Avançados e Estado da Arte
+
+As arquiteturas baseadas em difusão evoluíram consideravelmente desde sua formulação inicial. Os avanços recentes concentram-se na redução do custo computacional, no refinamento do controle de geração e no desenvolvimento de novas abordagens de segurança.
+
+### 8.1. Evolução Arquitetural: Diffusion Transformers (DiT)
+Tradicionalmente, os processos de difusão dependiam da arquitetura convolucional U-Net. Com o desenvolvimento dos **Diffusion Transformers (DiT)**, demonstrou-se que a adoção de convoluções não é estritamente necessária. Os DiTs aproveitam as leis de escalabilidade (*scaling laws*) inerentes aos Transformers, otimizando o processamento em grandes volumes de dados.
+
+**Estrutura e Condicionamento**
+Na arquitetura DiT, o espaço latente é fragmentado em *patches* convertidos em tokens. O condicionamento (via texto ou variáveis de ruído) é aplicado utilizando blocos de *Adaptive Layer Normalization* (adaLN). O modelo é inicializado como função de identidade para garantir estabilidade computacional nas etapas iniciais de treinamento.
+
+**Eficiência Computacional**
+A manipulação da resolução latente afeta de maneira previsível o balanço entre carga computacional (Gflops) e a qualidade da geração (FID).
+
+| Arquitetura | Tamanho do Patch Latente | Resolução | FID (ImageNet) | Gflops | Contagem de Parâmetros |
+|-------------|--------------------------|-----------|----------------|--------|------------------------|
+| DiT-XL/8    | 8                        | 256x256   | Alta (Menos detalhes) | Baixo  | 675M                   |
+| DiT-XL/2    | 2                        | 256x256   | 2.27           | 119    | 675M                   |
+| DiT-XL/2    | 2                        | 512x512   | 3.04           | 525    | 675M                   |
+| ADM-U (U-Net)| N/A                     | 512x512   | 3.85           | 2813   | >1B                    |
+
+*(Tabela: Comparativo de desempenho entre DiT e U-Net em relação à eficiência e qualidade)*
+
+### 8.2. Multimodalidade e MMDiT
+Em versões anteriores, a renderização de tipografia falhava devido à restrição da atenção cruzada unidirecional. A implementação do **Multimodal Diffusion Transformer (MMDiT)**, adotada em modelos como Stable Diffusion 3 e FLUX, permite a interação bidirecional entre tokens de imagem e texto, viabilizando resultados tipográficos consistentes.
+
+### 8.3. Otimização de Processamento: Flow Matching e Rectified Flows
+Modelos baseados em SDEs (Equações Diferenciais Estocásticas) tendem a demandar um grande número de iterações de remoção de ruído. A técnica de **Flow Matching** otimiza o trajeto de geração por meio do aprendizado de um campo de velocidade contínuo em ODEs. Quando combinada com **Rectified Flows**, a técnica aproxima as trajetórias matemáticas de um comportamento linear, reduzindo a quantidade de passos necessários para a síntese qualitativa.
+
+### 8.4. Modelos de Consistência (Consistency Models)
+A abordagem de **Consistency Models** altera o paradigma de geração iterativa ao mapear diretamente pontos ao longo da trajetória de difusão para a origem não ruidosa. Treinados via destilação de um modelo primário ou de modo independente, estes modelos alcançam a capacidade de gerar imagens em um passo computacional unificado, otimizando o tempo de latência em relação à arquitetura convencional.
+
+### 8.5. Condicionamento Visual Estrutural: IP-Adapters
+O **IP-Adapter** consolidou-se como um mecanismo de indução de estilo e estrutura visual. Sem a necessidade de alterar os parâmetros da rede original, a técnica integra redes adicionais que operam por meio de atenção cruzada desacoplada. Desta forma, atributos de uma imagem de referência influenciam a geração de maneira concomitante ao controle semântico estipulado via texto.
+
+### 8.6. Aplicação Tridimensional e Processamento de Vídeo
+Na transição para dados tridimensionais, técnicas como a **Score Distillation Sampling (SDS)** projetam distribuições 2D em representações espaciais (e.g., *3D Gaussian Splatting*). No contexto de vídeos, arquiteturas baseadas em DiT interpretam dados em formato de blocos latentes espaço-temporais (*spacetime latent patches*), capacitando o modelo a estipular fluidez e consistência cronológica em quadros dinâmicos.
+
+### 8.7. Mecanismos Adversariais e Autenticidade
+- **Proteção e Engenharia Adversarial:** Plataformas defensivas, como Glaze e Nightshade, permitem aos criadores aplicar perturbações adversariais em imagens para inibir processos de extração de padrões. Simultaneamente, pesquisas independentes formulam contramedidas heurísticas (como o sistema LightShed), cujo objetivo é detectar e neutralizar essas perturbações em tempo de processamento.
+- **Identificação Digital:** Para rastreamento de autoria, soluções tecnológicas como o SynthID inserem marcas criptográficas diretamente no domínio numérico da matriz da imagem. Este método propõe garantir a identificação forense inalterada mesmo perante processamentos severos de compressão, recorte e filtragem.
+
+---
+
 ## Fontes
 
 | Seção | Fonte |
@@ -266,3 +309,12 @@ Não existe consenso — é um debate técnico, ético e regulatório ainda em a
 | 6. GANs vs Diffusion Models | https://www.sapien.io/blog/gans-vs-diffusion-models-a-comparative-analysis |
 | 7. Direitos Autorais — decisão britânica | https://ids.org.br/noticia/getty-images-vs-stability-ai-tribunal-britanico-afirma-que-um-modelo-de-inteligencia-artificial-generativa-nao-e-por-si-so-uma-copia-infratora/ |
 | 7. Direitos Autorais — processo Getty | https://exame.com/inteligencia-artificial/getty-images-vai-a-justica-contra-stability-ai-por-uso-indevido-de-imagens/ |
+
+---
+
+## Histórico de Versões
+
+| Versão | Descrição | Autor(es) | Data | Revisor(es) | Data de Revisão |
+|---|---|---|---|---|---|
+| 1.0.0 | Criação do roteiro base | | |  |  |
+| 1.1.0 | Adição de Tópicos Avançados (DiT, LCM, IP-Adapter) | [Artur Mendonça Arruda](https://github.com/ArtyMend07) | 24/06/2026 |  | 24/06/2026 |
